@@ -9,9 +9,9 @@ public class EventTest {
 	@Test
 	public void builder() {
 		Event event = Event.builder()
-						.name("spring rest api")
-						.description("rest api development with spring")
-						.build();
+					.name("spring rest api")
+					.description("rest api development with spring")
+					.build();
 		assertThat(event).isNotNull();
 	}
 	
