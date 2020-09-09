@@ -10,9 +10,9 @@ public class EventValidator {
 	
 	public void validate(EventDto eventDto, Errors errors) {
 		if (eventDto.getBasePrice() > eventDto.getMaxPrice() && eventDto.getMaxPrice() != 0) {
-			errors.rejectValue("basePrice", "wrongValue","basePrice is wrong.");
-			errors.rejectValue("maxPrice", "wrongValue","maxPrice is wrong.");
-			
+//			errors.rejectValue("basePrice", "wrongValue","basePrice is wrong.");
+//			errors.rejectValue("maxPrice", "wrongValue","maxPrice is wrong.");
+			errors.reject("wrongPrices","value fo prices are wrong");
 		}
 		
 		LocalDateTime endEventDateTime = eventDto.getEndEventDateTime();
@@ -20,7 +20,7 @@ public class EventValidator {
 		if (endEventDateTime.isBefore(eventDto.getBeginEventDateTime()) ||
 				endEventDateTime.isBefore(eventDto.getCloseEnrollmentDateTime()) ||
 			    endEventDateTime.isBefore(eventDto.getBeginEnrollmentDateTime())) {
-			errors.rejectValue("endEventDateTime", "wrongValue");
+			errors.rejectValue("endEventDateTime", "wrongValue","endEventDateTime is wrong");
 			
 		}
 	}

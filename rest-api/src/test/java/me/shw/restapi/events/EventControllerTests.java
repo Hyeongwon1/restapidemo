@@ -135,9 +135,15 @@ public class EventControllerTests {
 				.location("동작구")
 				.build();
 		this.mockMvc.perform(post("/api/events")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(this.objectMapper.writeValueAsString(eventDto)))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(this.objectMapper.writeValueAsString(eventDto)))
+				.andDo(print())
 				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$[0].objectName").exists())
+				.andExpect(jsonPath("$[0].field").exists())
+				.andExpect(jsonPath("$[0].defaultMessage").exists())
+				.andExpect(jsonPath("$[0].code").exists())
+				.andExpect(jsonPath("$[0].rejectedValue").exists())
 					;
 		
 		
