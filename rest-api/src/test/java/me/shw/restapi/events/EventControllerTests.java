@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import me.shw.restapi.common.TestDescription;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest()
 @AutoConfigureMockMvc
@@ -36,6 +38,7 @@ public class EventControllerTests {
 	@Autowired ObjectMapper objectMapper;
 
 	@Test
+	@TestDescription("정상이벤트 생성 테스트")
 	public void createEvent() throws Exception {
 		EventDto event = EventDto.builder()
 				
@@ -72,6 +75,7 @@ public class EventControllerTests {
 	
 	}
 	@Test
+	@TestDescription("입력할수없는 값 이벤트 생성 테스트")
 	public void createEvent_Bad_Request() throws Exception {
 		Event event = Event.builder()
 				.id(100)
@@ -103,6 +107,7 @@ public class EventControllerTests {
 	}
 	
 	@Test
+	@TestDescription("입력값 비어있을 떄 이벤트 생성 테스트")
 	public void createEvent_Bad_Request_Empty_Input() throws Exception {
 		EventDto eventDto = EventDto.builder().build();
 		this.mockMvc.perform(post("/api/events")
@@ -115,6 +120,7 @@ public class EventControllerTests {
 	}
 	
 	@Test
+	@TestDescription("입력값 잘못되었을 때 이벤트 생성 테스트")
 	public void createEvent_Bad_Request_Wrong_Input() throws Exception {
 		EventDto eventDto = EventDto.builder()
 				.name("Spring")
