@@ -39,7 +39,7 @@ public class EventTest {
 	@CsvSource({
 		"0,0,true",
 		"100,0,false",
-		"0,100,true"
+		"0,100,false"
 		
 	})
 	public void testFree(int basePrice, int maxPrice, boolean isFree) {
