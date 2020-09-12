@@ -1,6 +1,7 @@
 package me.shw.restapi.events;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -8,8 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -51,6 +54,9 @@ public class EventControllerTests {
 	
 	@Autowired ObjectMapper objectMapper;
 
+	@Autowired
+	EventRepository eventRepository;
+	
 	@Test
 	@TestDescription("정상이벤트 생성 테스트")
 	public void createEvent() throws Exception {
@@ -164,7 +170,7 @@ public class EventControllerTests {
 //		event.setId(10);
 //		Mockito.when(eventRepository.save(event)).thenReturn(event);
 		
-		mockMvc.perform(post("/api/events/")
+		mockMvc.perform(post("/api/events")
 						.contentType(MediaType.APPLICATION_JSON)
 						.accept(MediaTypes.HAL_JSON)
 						.content(objectMapper.writeValueAsString(event)))
@@ -207,16 +213,79 @@ public class EventControllerTests {
 				.content(this.objectMapper.writeValueAsString(eventDto)))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].objectName").exists())
-				.andExpect(jsonPath("$[0].field").exists())
-				.andExpect(jsonPath("$[0].defaultMessage").exists())
-				.andExpect(jsonPath("$[0].code").exists())
-				.andExpect(jsonPath("$[0].rejectedValue").exists())
+				.andExpect(jsonPath("content[0].objectName").exists())
+				.andExpect(jsonPath("content[0].field").exists())
+				.andExpect(jsonPath("content[0].defaultMessage").exists())
+				.andExpect(jsonPath("content[0].code").exists())
+//				.andExpect(jsonPath("$[0].rejectedValue").exists())
+				.andExpect(jsonPath("_links.index").exists())
 					;
 		
 		
 	}
 	
+	@Test
+	@DisplayName("30개 이벤트를 10개씩 두번째 페이지 조회하기")
+	public void queryEvents() throws Exception {
+		//givne
+		IntStream.range(0, 30).forEach(i ->{
+			this.generateEvent(i);
+		});
+		
+		//when & then
+		this.mockMvc.perform(get("/api/events")
+						.param("page", "1")
+						.param("size", "10")
+						.param("sort", "name,DESC")
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("page").exists())
+				.andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+				.andExpect(jsonPath("_links.self").exists())
+				.andExpect(jsonPath("_links.profile").exists())
+				.andDo(document("query-event"))
+				;
 	
+	}
+
+	
+	@Test
+	@DisplayName("기존 이벤트 하나 조회하기")
+	public void getEvent() throws Exception {
+		//given
+		Event event =this.generateEvent(100);
+	
+		//when & then
+		this.mockMvc.perform(get("/api/events/{id}",event.getId()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("name").exists())
+				.andExpect(jsonPath("id").exists())
+				.andExpect(jsonPath("_links.self").exists())
+				.andExpect(jsonPath("_links.profile").exists())
+				.andDo(document("get-an-event"))
+				;
+	}
+	
+	@Test
+	@DisplayName("없는 이벤트조회 404 응답받기")
+	public void getEvent404() throws Exception {
+		//when & then
+			this.mockMvc.perform(get("/api/events/7777"))
+					.andExpect(status().isNotFound())
+					;		
+	}
+	
+	
+	private Event generateEvent(int index) {
+		
+		Event event = Event.builder()
+				.name("event"+ index)
+				.description("test event")
+				.build();
+		
+		return this.eventRepository.save(event);
+		
+	}
 
 }
